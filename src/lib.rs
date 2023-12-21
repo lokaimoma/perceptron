@@ -8,9 +8,16 @@ pub enum StepFunction {
 #[allow(non_snake_case)]
 pub struct Perceptron {
     pub X: Array2<f64>,
-    pub w: Array1<f64>,
-    pub bias: f64,
-    pub stepFunction: StepFunction,
+    pub step_function: StepFunction,
+    w: Array1<f64>,
+    bias: f64,
+}
+
+#[allow(non_snake_case)]
+impl Perceptron {
+    pub fn new(X: Array2<f64>, step_function: StepFunction) -> Self {
+        todo!()
+    }
 }
 
 #[inline]
