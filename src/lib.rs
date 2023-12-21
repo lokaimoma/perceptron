@@ -7,21 +7,21 @@ pub enum StepFunction {
 }
 
 #[allow(non_snake_case)]
+#[allow(dead_code)]
 pub struct Perceptron {
-    pub X: Array2<f64>,
-    pub step_function: StepFunction,
+    step_function: StepFunction,
     w: Array1<f64>,
     bias: f64,
 }
 
 #[allow(non_snake_case)]
+#[allow(dead_code)]
 impl Perceptron {
-    pub fn new(X: Array2<f64>, step_function: StepFunction) -> Self {
+    pub fn new(dim: usize, step_function: StepFunction) -> Self {
         let mut rng = rand::thread_rng();
-        let w = Array1::from_elem(X.ndim(), rng.gen());
+        let w = Array1::from_elem(dim, rng.gen());
 
         return Self {
-            X,
             step_function,
             w,
             bias: 1f64,
