@@ -1,4 +1,5 @@
 use ndarray::{Array1, Array2};
+use rand::{self, prelude::*};
 
 pub enum StepFunction {
     HEAVISIDE,
@@ -16,7 +17,15 @@ pub struct Perceptron {
 #[allow(non_snake_case)]
 impl Perceptron {
     pub fn new(X: Array2<f64>, step_function: StepFunction) -> Self {
-        todo!()
+        let mut rng = rand::thread_rng();
+        let w = Array1::from_elem(X.ndim(), rng.gen());
+
+        return Self {
+            X,
+            step_function,
+            w,
+            bias: 1f64,
+        };
     }
 }
 
