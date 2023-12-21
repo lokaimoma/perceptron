@@ -84,6 +84,7 @@ impl Perceptron {
         return self.w.view();
     }
 
+    #[inline]
     fn _train(&mut self, x: ArrayView1<f64>, target: i64) {
         let prediction = self.predict(x);
         let error: f64 = (target - prediction) as f64;
