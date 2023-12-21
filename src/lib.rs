@@ -12,3 +12,19 @@ pub struct Perceptron {
     pub bias: f64,
     pub stepFunction: StepFunction,
 }
+
+#[inline]
+fn heaviside(n: f64) -> i64 {
+    return if n < 0.0 { 0 } else { 1 };
+}
+
+#[inline]
+fn signum(n: f64) -> i64 {
+    return if n < 0.0 {
+        -1
+    } else if n == 0.0 {
+        0
+    } else {
+        1
+    };
+}
