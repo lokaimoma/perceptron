@@ -1,31 +1,83 @@
-use ndarray::{Array1, Array2};
-use rand::{self, prelude::*};
+use ndarray::{Array1, Array2, ArrayView1, Axis};
+use ndarray_rand::rand_distr::Uniform;
+use ndarray_rand::{RandomExt, SamplingStrategy};
+
+pub mod error;
+
+pub type Result<T> = std::result::Result<T, error::PerceptronError>;
 
 pub enum StepFunction {
     HEAVISIDE,
     SIGNUM,
 }
 
-#[allow(non_snake_case)]
 #[allow(dead_code)]
 pub struct Perceptron {
     step_function: StepFunction,
     w: Array1<f64>,
     bias: f64,
+    learning_rate: f64,
+    decay_rate: f64,
 }
 
 #[allow(non_snake_case)]
-#[allow(dead_code)]
 impl Perceptron {
-    pub fn new(dim: usize, step_function: StepFunction) -> Self {
-        let mut rng = rand::thread_rng();
-        let w = Array1::from_elem(dim, rng.gen());
+    pub fn new(
+        dim: usize,
+        step_function: StepFunction,
+        learning_rate: f64,
+        decay_rate: f64,
+    ) -> Self {
+        let w = Array1::random(dim, Uniform::new(0.0, 1.0));
 
         return Self {
             step_function,
             w,
             bias: 1f64,
+            learning_rate,
+            decay_rate,
         };
+    }
+
+    pub fn train(&mut self, X: Array2<f64>, targets: Array1<i64>, n_iter: usize) -> Result<()> {
+        if X.len() != targets.len() {
+            return Err(error::PerceptronError::MisMatchLength(format!(
+                "Feature matrix and targets array of different length: X={}, targets={}",
+                X.len(),
+                targets.len()
+            )));
+        }
+
+        if n_iter > X.len() {
+            return Err(error::PerceptronError::NIterLenError);
+        }
+
+        let indexes = Array1::range(0f64, X.len() as f64, 1f64);
+        let indexes = indexes.sample_axis(Axis(0), n_iter, SamplingStrategy::WithReplacement);
+
+        for i in indexes {
+            self._train(X.index_axis(Axis(0), i as usize), targets[i as usize]);
+
+            if self.learning_rate > 0.001 {
+                self.learning_rate *= self.decay_rate;
+            }
+
+            if self.learning_rate < 0.001 {
+                self.learning_rate = 0.001;
+            }
+        }
+
+        return Ok(());
+    }
+
+    fn _train(&mut self, x: ArrayView1<f64>, target: i64) {
+        let prediction = (&x * &self.w).sum() + self.bias;
+        let prediction = match self.step_function {
+            StepFunction::HEAVISIDE => heaviside(prediction),
+            StepFunction::SIGNUM => signum(prediction),
+        };
+        let error: f64 = (target - prediction) as f64;
+        self.w = &self.w + self.learning_rate * error * &x;
     }
 }
 
