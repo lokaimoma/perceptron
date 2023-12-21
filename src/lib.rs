@@ -71,13 +71,19 @@ impl Perceptron {
     }
 
     fn _train(&mut self, x: ArrayView1<f64>, target: i64) {
+        let prediction = self.predict(x);
+        let error: f64 = (target - prediction) as f64;
+        self.w = &self.w + self.learning_rate * error * &x;
+    }
+
+    #[inline]
+    fn predict(&self, x: ArrayView1<f64>) -> i64 {
         let prediction = (&x * &self.w).sum() + self.bias;
         let prediction = match self.step_function {
             StepFunction::HEAVISIDE => heaviside(prediction),
             StepFunction::SIGNUM => signum(prediction),
         };
-        let error: f64 = (target - prediction) as f64;
-        self.w = &self.w + self.learning_rate * error * &x;
+        return prediction;
     }
 }
 
