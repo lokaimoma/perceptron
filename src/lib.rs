@@ -40,7 +40,7 @@ impl Perceptron {
     }
 
     pub fn train(&mut self, X: Array2<f64>, targets: Array1<i64>, n_iter: usize) -> Result<()> {
-        if X.len() != targets.len() {
+        if X.dim().0 != targets.len() {
             return Err(error::PerceptronError::MisMatchLength(format!(
                 "Feature matrix and targets array of different length: X={}, targets={}",
                 X.len(),
@@ -52,7 +52,7 @@ impl Perceptron {
             return Err(error::PerceptronError::NIterLenError);
         }
 
-        let indexes = Array1::range(0f64, X.len() as f64, 1f64);
+        let indexes = Array1::range(0f64, X.dim().0 as f64, 1f64);
         let indexes = indexes.sample_axis(Axis(0), n_iter, SamplingStrategy::WithReplacement);
 
         for i in indexes {
@@ -70,20 +70,24 @@ impl Perceptron {
         return Ok(());
     }
 
-    fn _train(&mut self, x: ArrayView1<f64>, target: i64) {
-        let prediction = self.predict(x);
-        let error: f64 = (target - prediction) as f64;
-        self.w = &self.w + self.learning_rate * error * &x;
-    }
-
     #[inline]
-    fn predict(&self, x: ArrayView1<f64>) -> i64 {
+    pub fn predict(&self, x: ArrayView1<f64>) -> i64 {
         let prediction = (&x * &self.w).sum() + self.bias;
         let prediction = match self.step_function {
             StepFunction::HEAVISIDE => heaviside(prediction),
             StepFunction::SIGNUM => signum(prediction),
         };
         return prediction;
+    }
+
+    pub fn weights(&self) -> ArrayView1<f64> {
+        return self.w.view();
+    }
+
+    fn _train(&mut self, x: ArrayView1<f64>, target: i64) {
+        let prediction = self.predict(x);
+        let error: f64 = (target - prediction) as f64;
+        self.w = &self.w + self.learning_rate * error * &x;
     }
 }
 
