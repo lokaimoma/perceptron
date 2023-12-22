@@ -46,22 +46,23 @@ impl Perceptron {
             )));
         }
 
-        if n_iter > X.len() {
-            return Err(error::PerceptronError::NIterLenError);
-        }
-
         let indexes = Array1::range(0f64, X.dim().0 as f64, 1f64);
-        let indexes = indexes.sample_axis(Axis(0), n_iter, SamplingStrategy::WithReplacement);
+        let indexes = indexes.sample_axis(Axis(0), X.len(), SamplingStrategy::WithReplacement);
 
-        for i in indexes {
-            self._train(X.index_axis(Axis(0), i as usize), targets[i as usize]);
+        for _ in 0..n_iter {
+            for i in indexes.iter() {
+                self._train(
+                    X.index_axis(Axis(0), i.to_owned() as usize),
+                    targets[i.to_owned() as usize],
+                );
 
-            if self.learning_rate > 0.001 {
-                self.learning_rate *= self.decay_rate;
-            }
+                if self.learning_rate > 0.001 {
+                    self.learning_rate *= self.decay_rate;
+                }
 
-            if self.learning_rate < 0.001 {
-                self.learning_rate = 0.001;
+                if self.learning_rate < 0.001 {
+                    self.learning_rate = 0.001;
+                }
             }
         }
 

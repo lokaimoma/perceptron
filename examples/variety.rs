@@ -17,7 +17,7 @@ fn main() {
     let mut perceptron = Perceptron::new(X.dim().1, perceptron::StepFunction::HEAVISIDE, 0.05, 0.9);
     println!("Ndim = {}", X.dim().1);
     println!("Training perceptron....");
-    perceptron.train(X, y, 6).unwrap();
+    perceptron.train(X, y, 1000).unwrap();
     println!("Done training perceptron....");
     println!(
         "Predicting [0.3, 0.3, 0.3] Expected output: 1 \nGot: {}",
