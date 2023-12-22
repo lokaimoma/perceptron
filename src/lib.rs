@@ -1,4 +1,4 @@
-use ndarray::{array, concatenate, s, Array1, Array2, ArrayView1, Axis};
+use ndarray::{array, concatenate, Array1, Array2, ArrayView1, Axis};
 use ndarray_rand::rand_distr::Uniform;
 use ndarray_rand::{RandomExt, SamplingStrategy};
 
