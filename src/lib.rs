@@ -89,6 +89,7 @@ impl Perceptron {
         let prediction = self.predict(x);
         let error: f64 = (target - prediction) as f64;
         self.w = &self.w + self.learning_rate * error * &x;
+        self.bias = self.bias + self.learning_rate * error * self.bias;
     }
 }
 
