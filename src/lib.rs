@@ -1,4 +1,4 @@
-use ndarray::{Array1, Array2, ArrayView1, Axis};
+use ndarray::{array, concatenate, s, Array1, Array2, ArrayView1, Axis};
 use ndarray_rand::rand_distr::Uniform;
 use ndarray_rand::{RandomExt, SamplingStrategy};
 
@@ -15,7 +15,6 @@ pub enum StepFunction {
 pub struct Perceptron {
     step_function: StepFunction,
     w: Array1<f64>,
-    bias: f64,
     learning_rate: f64,
     decay_rate: f64,
 }
@@ -28,12 +27,12 @@ impl Perceptron {
         learning_rate: f64,
         decay_rate: f64,
     ) -> Self {
-        let w = Array1::random(dim, Uniform::new(0.0, 1.0));
+        let mut w = Array1::random(dim + 1, Uniform::new(0.0, 1.0));
+        w[0] = 1f64; // weight for bias
 
         return Self {
             step_function,
             w,
-            bias: 1f64,
             learning_rate,
             decay_rate,
         };
@@ -72,7 +71,8 @@ impl Perceptron {
 
     #[inline]
     pub fn predict(&self, x: ArrayView1<f64>) -> i64 {
-        let prediction = (&x * &self.w).sum() + self.bias;
+        let bias_with_features = concatenate![Axis(0), array![1.0], x];
+        let prediction = (bias_with_features * &self.w).sum();
         let prediction = match self.step_function {
             StepFunction::HEAVISIDE => heaviside(prediction),
             StepFunction::SIGNUM => signum(prediction),
@@ -88,8 +88,8 @@ impl Perceptron {
     fn _train(&mut self, x: ArrayView1<f64>, target: i64) {
         let prediction = self.predict(x);
         let error: f64 = (target - prediction) as f64;
-        self.w = &self.w + self.learning_rate * error * &x;
-        self.bias = self.bias + self.learning_rate * error * self.bias;
+        let bias_with_features = concatenate![Axis(0), array![1.0], x];
+        self.w = &self.w + self.learning_rate * error * bias_with_features;
     }
 }
 
