@@ -27,8 +27,7 @@ impl Perceptron {
         learning_rate: f64,
         decay_rate: f64,
     ) -> Self {
-        let mut w = Array1::random(dim + 1, Uniform::new(0.0, 1.0));
-        w[0] = 1f64; // weight for bias
+        let w = Array1::random(dim + 1, Uniform::new(0.0, 1.0)); //weights for bias & features
 
         return Self {
             step_function,
